@@ -96,6 +96,7 @@
             border-radius: 50% 50% 50% 50% / 80% 80% 20% 20%;
             width: 100%;
             height: 100%;
+            border: 1.5px solid var(--bg-color);
         }
 
         .petal.center {
@@ -307,7 +308,7 @@
             // Cambiar el mensaje después de que crezcan
             setTimeout(() => {
                 const ui = document.getElementById('main-ui');
-                ui.innerHTML = `<h2 style="color: #ff4d6d; font-weight: 300; padding: 20px;">No pude regalarte un ramo de flores,<br>pero te hice este pequeño jardín.<br><span style="font-size: 1.325rem; margin-top: 10px; display: block;">❤️ Feliz San Valentín ❤️</span><br>Atte: Edwin ❤️</h2>`;
+                ui.innerHTML = `<h2 style="color: #ff4d6d; font-weight: 300; padding: 20px;">No pude regalarte un ramo de flores,<br>pero te hice este pequeño jardín.<br><span style="font-size: 1.325rem; margin-top: 10px; display: block;">❤️ Feliz San Valentín ❤️</span><br> <span style="font-size: 1rem;">Atte: Edwin ❤️</span></h2>`;
                 ui.style.opacity = '1';
 
                 // Iniciar tulipanes cayendo después de 1 segundo

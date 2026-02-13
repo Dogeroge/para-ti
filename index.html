@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Para Ti</title>
+    <style>
+        :root {
+            --bg-color: #fff5f7;
+            --tulip-pink: #ff8fa3;
+            --tulip-dark: #ff4d6d;
+            --stem-green: #70e000;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            overscroll-behavior: none;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #canvas-container {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .message-container {
+            text-align: center;
+            z-index: 10;
+            transition: opacity 1s ease;
+        }
+
+        h1 {
+            color: var(--tulip-dark);
+            font-weight: 300;
+            font-size: 1.625rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            border: 1px solid var(--tulip-pink);
+            padding: 15px 30px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+
+        h2 {
+            color: var(--tulip-dark);
+            font-weight: 300;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        h1:hover {
+            background: var(--tulip-pink);
+            color: white;
+        }
+
+        /* Estilos de los Tulipanes */
+        .tulip {
+            position: absolute;
+            bottom: -100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: grow 4s forwards ease-out;
+        }
+
+        .flower {
+            position: relative;
+            width: 60px;
+            height: 95px;
+        }
+
+        .petal {
+            position: absolute;
+            background: var(--tulip-pink);
+            border-radius: 50% 50% 50% 50% / 80% 80% 20% 20%;
+            width: 100%;
+            height: 100%;
+        }
+
+        .petal.center {
+            z-index: 2;
+            background: var(--tulip-dark);
+            transform: scale(0.9);
+        }
+
+        .petal.left {
+            left: -15px;
+            transform: rotate(-20deg);
+            z-index: 1;
+        }
+
+        .petal.right {
+            right: -15px;
+            transform: rotate(20deg);
+            z-index: 1;
+        }
+
+        .stem {
+            width: 4px;
+            height: 150px;
+            background: var(--stem-green);
+            border-radius: 2px;
+        }
+
+        @keyframes grow {
+            0% {
+                transform: translateY(0) scale(0);
+                opacity: 0;
+            }
+
+            20% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-280px) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .sway {
+            animation: sway 3s infinite ease-in-out;
+        }
+
+        @keyframes sway {
+
+            0%,
+            100% {
+                transform: rotate(-2deg);
+            }
+
+            50% {
+                transform: rotate(2deg);
+            }
+        }
+
+        .footer {
+            position: absolute;
+            top: 0;
+            right: 0;
+            text-align: center;
+            color: var(--tulip-dark);
+            font-weight: 300;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            padding: 15px 30px;
+            transition: all 0.3s ease;
+        }
+
+        .hug-counter {
+            position: absolute;
+            top: 1.5rem;
+            right: 0;
+            text-align: center;
+            color: var(--tulip-dark);
+            font-weight: 300;
+            font-size: 0.80rem;
+            letter-spacing: 2px;
+            padding: 15px 30px;
+            transition: all 0.3s ease;
+        }
+
+        .hug-counter .count {
+            font-weight: 400;
+        }
+
+        /* Estilos para tulipanes cayendo */
+        .falling-tulip {
+            position: fixed;
+            top: -100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .falling-tulip .flower {
+            width: 27px;
+            height: 37px;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(calc(50vh + 100px)) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .falling-tulip.falling {
+            animation: fall linear forwards;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="message-container" id="main-ui">
+        <h2>Para Julieta</h2>
+        <h1 onclick="startGarden()">Toca para ver algo mágico...</h1>
+    </div>
+
+    <div id="canvas-container"></div>
+    <div id="footer" class="footer">
+        Hecho con mucho cariño ❤️ </div>
+
+    <div id="hug-counter" class="hug-counter">
+        Conteo de abrazos:
+        <span class="count" id="hug-count">0</span>
+    </div>
+
+    <script>
+        // Inicializar contador de abrazos
+        function initHugCounter() {
+            // Obtener contador actual del localStorage
+            let hugCount = localStorage.getItem('hugCount');
+
+            // Si no existe, inicializar en 0
+            if (hugCount === null) {
+                hugCount = 0;
+            } else {
+                hugCount = parseInt(hugCount);
+            }
+
+            // Incrementar el contador
+            hugCount++;
+
+            // Guardar en localStorage
+            localStorage.setItem('hugCount', hugCount);
+
+            // Actualizar la UI
+            document.getElementById('hug-count').textContent = hugCount;
+        }
+
+        // Ejecutar al cargar la página
+        initHugCounter();
+
+        function createTulip(x) {
+            const container = document.getElementById('canvas-container');
+            const tulip = document.createElement('div');
+            tulip.className = 'tulip sway';
+            tulip.style.left = x + '%';
+
+            // Variar colores y tamaños ligeramente para que sea orgánico
+            const delay = Math.random() * 2;
+            const height = 100 + Math.random() * 100;
+            tulip.style.animationDelay = delay + 's';
+
+            tulip.innerHTML = `
+                <div class="flower">
+                    <div class="petal left"></div>
+                    <div class="petal center"></div>
+                    <div class="petal right"></div>
+                </div>
+                <div class="stem" style="height: ${height}px"></div>
+            `;
+
+            container.appendChild(tulip);
+        }
+
+        function startGarden() {
+            // Ocultar botón
+            document.getElementById('main-ui').style.opacity = '0';
+
+            // Detectar si es móvil o desktop
+            const isMobile = window.innerWidth <= 768;
+            const flowerCount = isMobile ? 15 : 30;
+
+            // Crear tulipanes en posiciones aleatorias
+            for (let i = 0; i < flowerCount; i++) {
+                setTimeout(() => {
+                    // Ajustar distribución para centrar mejor las flores (10-85% en lugar de 5-95%)
+                    createTulip(Math.random() * 75 + 10);
+                }, i * 200);
+            }
+
+            // Cambiar el mensaje después de que crezcan
+            setTimeout(() => {
+                const ui = document.getElementById('main-ui');
+                ui.innerHTML = `<h2 style="color: #ff4d6d; font-weight: 300; padding: 20px;">No pude regalarte un ramo de flores,<br>pero te hice este pequeño jardín.<br><span style="font-size: 1.325rem; margin-top: 10px; display: block;">❤️ Feliz San Valentín ❤️</span><br>Atte: Edwin ❤️</h2>`;
+                ui.style.opacity = '1';
+
+                // Iniciar tulipanes cayendo después de 1 segundo
+                setTimeout(() => {
+                    startFallingTulips();
+                }, 1000);
+            }, 4000);
+        }
+
+        // Crear un tulipán cayendo
+        function createFallingTulip() {
+            const body = document.body;
+            const tulip = document.createElement('div');
+            tulip.className = 'falling-tulip falling';
+
+            // Posición horizontal aleatoria
+            const randomX = Math.random() * 100;
+            tulip.style.left = randomX + '%';
+
+            // Duración aleatoria entre 3-6 segundos
+            const duration = 3 + Math.random() * 3;
+            tulip.style.animationDuration = duration + 's';
+
+            // Colores aleatorios de tulipán
+            const colors = ['#ff8fa3', '#ff4d6d', '#ffb3c6', '#ff6b9d'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            tulip.innerHTML = `
+                <div class="flower">
+                    <div class="petal left" style="background: ${color};"></div>
+                    <div class="petal center" style="background: ${color}; filter: brightness(0.8);"></div>
+                    <div class="petal right" style="background: ${color};"></div>
+                </div>
+            `;
+
+            body.appendChild(tulip);
+
+            // Remover después de la animación
+            setTimeout(() => {
+                tulip.remove();
+            }, duration * 1000);
+        }
+
+        // Iniciar la caída continua de tulipanes
+        function startFallingTulips() {
+            // Crear tulipanes cada 500-1500ms
+            setInterval(() => {
+                createFallingTulip();
+            }, 500 + Math.random() * 1000);
+        }
+    </script>
+</body>
+
+</html>
